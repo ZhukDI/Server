@@ -28,11 +28,14 @@ void SendMessageToClient(int ID)
 			cerr << "Recv failed: " << result << "\n";
 			//shutdown(Connections[ID], 2);
 			closesocket(Connections[ID]);
-			
+			break;	
 		}
 		else if (result == 0) {
 			// соединение закрыто клиентом
 			cerr << "connection closed...\n";
+			closesocket(Connections[ID]);
+			//for (int i = ID; i < )
+			break;
 		}
 		else if (result > 0)
 		{
@@ -51,7 +54,7 @@ void SendMessageToClient(int ID)
 		}
 		//closesocket(Connections[ID]);
 	}
-	delete []buffer;
+	//delete []buffer;
 }
 
 int main()
@@ -136,7 +139,7 @@ int main()
 	freeaddrinfo(addr);
 
 	printf("Start server...\n");
-	char m_connect[] = "Connect...;;;5";
+	char m_connect[] = "Connect...\0";
 
 	Connections = (SOCKET*)calloc(64, sizeof(SOCKET));//инициализируем массив пользователей
 
@@ -152,7 +155,10 @@ int main()
 				cerr << "send failed: " << WSAGetLastError() << "\n";
 			}
 			client_count++;
-			CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)SendMessageToClient, (LPVOID)(client_count - 1), NULL, NULL);
+			auto handle = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)SendMessageToClient, (LPVOID)(client_count - 1), NULL, NULL);
+			CloseHandle(handle);
+			//if (CloseHandle(handle))
+			//	client_count--;
 		}
 	}
 	closesocket(client_socket);
